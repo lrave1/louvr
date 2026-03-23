@@ -108,7 +108,8 @@ class LeadController
         switch ($action) {
             case 'update_status':
                 $newStatus = $_POST['status'] ?? '';
-                if (in_array($newStatus, Lead::DEFAULT_STATUSES) && $newStatus !== $lead['status']) {
+                $validStatuses = Lead::getOptions($this->db)['statuses'];
+                if (in_array($newStatus, $validStatuses) && strtolower($newStatus) !== strtolower($lead['status'])) {
                     Lead::update($this->db, $id, ['status' => $newStatus]);
                     LeadHistory::record($this->db, $id, 'status_changed', $lead['status'], $newStatus);
                     $_SESSION['toast'] = ['type' => 'success', 'message' => 'Status updated.'];

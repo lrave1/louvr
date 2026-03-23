@@ -196,11 +196,12 @@ ob_start();
                 <input type="hidden" name="action" value="update_status">
                 <input type="hidden" name="status" id="statusInput" value="">
                 <div class="grid grid-cols-2 gap-2">
-                    <?php foreach (['new', 'assigned', 'booked', 'quoted', 'won', 'lost'] as $s): ?>
+                    <?php foreach ($options['statuses'] as $s): ?>
+                    <?php $sLower = strtolower($s); $currentLower = strtolower($lead['status']); ?>
                     <button type="button"
-                        class="px-3 py-2 text-xs font-medium rounded-lg border transition-all <?= $lead['status'] === $s ? $statusBg[$s] . ' ring-2 ring-offset-1 ring-offset-gray-900' : 'border-gray-700 text-gray-400 hover:text-white hover:border-gray-500' ?>"
-                        onclick="<?php if (in_array($s, ['won', 'lost']) && $lead['status'] !== $s): ?>showConfirm('Mark as <?= ucfirst($s) ?>', 'Are you sure you want to mark this lead as <?= $s ?>?', () => { document.getElementById('statusInput').value='<?= $s ?>'; document.getElementById('statusForm').submit(); })<?php else: ?>document.getElementById('statusInput').value='<?= $s ?>'; document.getElementById('statusForm').submit()<?php endif; ?>">
-                        <?= ucfirst($s) ?>
+                        class="px-3 py-2 text-xs font-medium rounded-lg border transition-all <?= $currentLower === $sLower ? ($statusBg[$s] ?? $statusBg[$sLower] ?? 'bg-gray-500/10 border-gray-500/30 text-gray-400') . ' ring-2 ring-offset-1 ring-offset-gray-900' : 'border-gray-700 text-gray-400 hover:text-white hover:border-gray-500' ?>"
+                        onclick="<?php $closedStatuses = array_slice($options['statuses'], -2); if (in_array($s, $closedStatuses) && $currentLower !== $sLower): ?>showConfirm('Mark as <?= $e($s) ?>', 'Are you sure you want to mark this lead as <?= $e($s) ?>?', () => { document.getElementById('statusInput').value='<?= $e($s) ?>'; document.getElementById('statusForm').submit(); })<?php else: ?>document.getElementById('statusInput').value='<?= $e($s) ?>'; document.getElementById('statusForm').submit()<?php endif; ?>">
+                        <?= $e($s) ?>
                     </button>
                     <?php endforeach; ?>
                 </div>
