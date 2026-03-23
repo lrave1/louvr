@@ -48,7 +48,7 @@ Schema::seed($db);
 
 // Start session (skip for API routes)
 $uri = strtok($_SERVER['REQUEST_URI'], '?');
-$isApi = str_starts_with($uri, '/api/');
+$isApi = str_starts_with($uri, '/api/') && !str_starts_with($uri, '/api/dispatch/');
 
 if (!$isApi) {
     Auth::startSession($config['session']);
@@ -85,6 +85,14 @@ $router->post('/settings/options', 'App\\Controllers\\SettingsController', 'upda
 
 // API
 $router->post('/api/leads', 'App\\Controllers\\ApiController', 'createLead');
+
+// Dispatch board
+$router->get('/dispatch', 'App\\Controllers\\DispatchController', 'board');
+$router->get('/my-calendar', 'App\\Controllers\\DispatchController', 'myCalendar');
+$router->get('/api/dispatch/events', 'App\\Controllers\\DispatchController', 'events');
+$router->get('/api/dispatch/unassigned', 'App\\Controllers\\DispatchController', 'unassigned');
+$router->post('/api/dispatch/book', 'App\\Controllers\\DispatchController', 'book');
+$router->post('/api/dispatch/move', 'App\\Controllers\\DispatchController', 'move');
 
 // Dispatch
 $method = $_SERVER['REQUEST_METHOD'];
