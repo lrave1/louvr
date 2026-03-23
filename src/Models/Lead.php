@@ -161,10 +161,18 @@ class Lead
     /** Pipeline summary counts */
     public static function pipelineCounts(Database $db): array
     {
+        $options = self::getOptions($db);
+        $counts = array_fill_keys($options['statuses'], 0);
         $rows = $db->fetchAll('SELECT status, COUNT(*) as count FROM leads GROUP BY status');
-        $counts = array_fill_keys(self::DEFAULT_STATUSES, 0);
         foreach ($rows as $row) {
-            $counts[$row['status']] = (int)$row['count'];
+            // Match case-insensitively
+            foreach ($counts as $key => &$val) {
+                if (strtolower($key) === strtolower($row['status'])) {
+                    $val = (int)$row['count'];
+                    break;
+                }
+            }
+            unset($val);
         }
         return $counts;
     }
