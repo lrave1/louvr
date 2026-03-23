@@ -162,7 +162,7 @@ class Lead
     public static function pipelineCounts(Database $db): array
     {
         $rows = $db->fetchAll('SELECT status, COUNT(*) as count FROM leads GROUP BY status');
-        $counts = array_fill_keys(self::STATUSES, 0);
+        $counts = array_fill_keys(self::DEFAULT_STATUSES, 0);
         foreach ($rows as $row) {
             $counts[$row['status']] = (int)$row['count'];
         }

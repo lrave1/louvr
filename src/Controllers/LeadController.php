@@ -108,7 +108,7 @@ class LeadController
         switch ($action) {
             case 'update_status':
                 $newStatus = $_POST['status'] ?? '';
-                if (in_array($newStatus, Lead::STATUSES) && $newStatus !== $lead['status']) {
+                if (in_array($newStatus, Lead::DEFAULT_STATUSES) && $newStatus !== $lead['status']) {
                     Lead::update($this->db, $id, ['status' => $newStatus]);
                     LeadHistory::record($this->db, $id, 'status_changed', $lead['status'], $newStatus);
                     $_SESSION['toast'] = ['type' => 'success', 'message' => 'Status updated.'];
@@ -213,10 +213,10 @@ class LeadController
         if ($data['customer_email'] !== '' && !filter_var($data['customer_email'], FILTER_VALIDATE_EMAIL)) {
             $errors[] = 'Invalid email address.';
         }
-        if (!in_array($data['property_type'], Lead::PROPERTY_TYPES)) {
+        if (!in_array($data['property_type'], Lead::DEFAULT_PROPERTY_TYPES)) {
             $errors[] = 'Invalid property type.';
         }
-        if (!in_array($data['source'], Lead::SOURCES)) {
+        if (!in_array($data['source'], Lead::DEFAULT_SOURCES)) {
             $errors[] = 'Invalid source.';
         }
 
