@@ -41,7 +41,7 @@ ob_start();
             <p class="text-gray-500 text-sm">#<?= $lead['id'] ?> &middot; Created <?= date('M j, Y g:ia', strtotime($lead['created_at'])) ?></p>
         </div>
     </div>
-    <span class="text-sm px-3 py-1.5 rounded-full border font-medium <?= $statusBg[$lead['status']] ?>"><?= ucfirst($lead['status']) ?></span>
+    <span class="text-sm px-3 py-1.5 rounded-full border font-medium <?= $statusBg[$lead['status']] ?? $statusBg[strtolower($lead['status'])] ?? 'bg-gray-500/10 border-gray-500/30 text-gray-400' ?>"><?= ucfirst($lead['status']) ?></span>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

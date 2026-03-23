@@ -87,7 +87,7 @@ ob_start();
                 </td>
                 <td class="px-5 py-3 text-gray-400 hidden lg:table-cell"><?= $e($lead['suburb']) ?><?= $lead['state'] ? ', ' . $e($lead['state']) : '' ?></td>
                 <td class="px-5 py-3">
-                    <span class="text-xs px-2 py-1 rounded-full border <?= $statusBg[$lead['status']] ?>"><?= ucfirst($lead['status']) ?></span>
+                    <span class="text-xs px-2 py-1 rounded-full border <?= $statusBg[$lead['status']] ?? $statusBg[strtolower($lead['status'])] ?? 'bg-gray-500/10 border-gray-500/30 text-gray-400' ?>"><?= ucfirst($lead['status']) ?></span>
                 </td>
                 <td class="px-5 py-3 text-gray-400 hidden md:table-cell"><?= $e($lead['rep_name'] ?? 'Unassigned') ?></td>
                 <td class="px-5 py-3 text-gray-400 hidden lg:table-cell"><?= ucfirst(str_replace('_', ' ', $lead['source'])) ?></td>
