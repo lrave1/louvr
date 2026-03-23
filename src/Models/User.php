@@ -57,7 +57,7 @@ class User
         $fields = [];
         $params = [':id' => $id];
 
-        foreach (['name', 'email', 'phone', 'role'] as $field) {
+        foreach (['name', 'email', 'phone', 'role', 'states', 'postcodes'] as $field) {
             if (isset($data[$field])) {
                 $fields[] = "$field = :$field";
                 $params[":$field"] = $data[$field];
@@ -86,6 +86,53 @@ class User
             [':key' => $key, ':id' => $id]
         );
         return $key;
+    }
+
+    /**
+     * Find matching reps for a lead based on state and postcode.
+     * Returns array of matching rep IDs, sorted by best match.
+     */
+    public static function matchRepsForLead(Database $db, string $state, string $postcode): array
+    {
+        $reps = self::activeReps($db);
+        $matches = [];
+
+        $state = strtoupper(trim($state));
+        $postcode = trim($postcode);
+
+        foreach ($reps as $rep) {
+            $repStates = array_map('trim', array_map('strtoupper', explode(',', $rep['states'] ?? '')));
+            $repPostcodes = trim($rep['postcodes'] ?? '');
+
+            $stateMatch = !empty($state) && in_array($state, $repStates);
+            $postcodeMatch = false;
+
+            if (!empty($postcode) && !empty($repPostcodes)) {
+                // Parse postcode ranges: "4000-4179, 4500, 4600-4610"
+                $ranges = array_map('trim', explode(',', $repPostcodes));
+                foreach ($ranges as $range) {
+                    if (str_contains($range, '-')) {
+                        [$low, $high] = array_map('trim', explode('-', $range, 2));
+                        if ($postcode >= $low && $postcode <= $high) {
+                            $postcodeMatch = true;
+                            break;
+                        }
+                    } elseif ($postcode === $range) {
+                        $postcodeMatch = true;
+                        break;
+                    }
+                }
+            }
+
+            if ($stateMatch || $postcodeMatch) {
+                $score = ($stateMatch ? 1 : 0) + ($postcodeMatch ? 2 : 0);
+                $matches[] = ['rep' => $rep, 'score' => $score];
+            }
+        }
+
+        // Sort by score descending (postcode match > state match)
+        usort($matches, fn($a, $b) => $b['score'] <=> $a['score']);
+        return array_column($matches, 'rep');
     }
 
     /** Rep performance stats */

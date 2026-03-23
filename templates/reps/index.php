@@ -70,6 +70,7 @@ ob_start();
             <tr class="text-left text-xs text-gray-400 uppercase tracking-wider">
                 <th class="px-5 py-3">User</th>
                 <th class="px-5 py-3">Role</th>
+                <th class="px-5 py-3 hidden lg:table-cell">Coverage</th>
                 <th class="px-5 py-3 hidden md:table-cell">Phone</th>
                 <th class="px-5 py-3 hidden md:table-cell">Leads</th>
                 <th class="px-5 py-3 hidden md:table-cell">Conv. Rate</th>
@@ -87,6 +88,17 @@ ob_start();
                 </td>
                 <td class="px-5 py-3">
                     <span class="text-xs px-2 py-1 rounded-full <?= $user['role'] === 'admin' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/30' : 'bg-gray-700 text-gray-300' ?>"><?= ucfirst($user['role']) ?></span>
+                </td>
+                <td class="px-5 py-3 hidden lg:table-cell">
+                    <?php if (!empty($user['states'])): ?>
+                    <span class="text-xs text-gray-400"><?= $e($user['states']) ?></span>
+                    <?php endif; ?>
+                    <?php if (!empty($user['postcodes'])): ?>
+                    <span class="text-xs text-gray-600 block"><?= $e($user['postcodes']) ?></span>
+                    <?php endif; ?>
+                    <?php if (empty($user['states']) && empty($user['postcodes'])): ?>
+                    <span class="text-xs text-gray-600">-</span>
+                    <?php endif; ?>
                 </td>
                 <td class="px-5 py-3 text-gray-400 hidden md:table-cell"><?= $e($user['phone']) ?: '-' ?></td>
                 <td class="px-5 py-3 text-gray-400 hidden md:table-cell"><?= $user['total_leads'] ?></td>
@@ -139,6 +151,14 @@ ob_start();
                                 <option value="rep" <?= $user['role'] === 'rep' ? 'selected' : '' ?>>Rep</option>
                                 <option value="admin" <?= $user['role'] === 'admin' ? 'selected' : '' ?>>Admin</option>
                             </select>
+                        </div>
+                        <div>
+                            <label class="text-gray-500 text-xs">States</label>
+                            <input name="states" value="<?= $e($user['states'] ?? '') ?>" placeholder="QLD, NSW, VIC" class="mt-1 px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="text-gray-500 text-xs">Postcodes</label>
+                            <input name="postcodes" value="<?= $e($user['postcodes'] ?? '') ?>" placeholder="4000-4179, 4500" class="mt-1 px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-48">
                         </div>
                         <div>
                             <label class="text-gray-500 text-xs">New Password (optional)</label>

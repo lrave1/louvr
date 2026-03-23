@@ -19,10 +19,16 @@ class Schema
             role TEXT NOT NULL DEFAULT "rep" CHECK(role IN ("admin","rep")),
             password_hash TEXT NOT NULL,
             api_key TEXT UNIQUE,
+            states TEXT DEFAULT "",
+            postcodes TEXT DEFAULT "",
             is_active INTEGER NOT NULL DEFAULT 1,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )');
+
+        // Migration: add states/postcodes to existing users table
+        try { $pdo->exec('ALTER TABLE users ADD COLUMN states TEXT DEFAULT ""'); } catch (\Exception $e) {}
+        try { $pdo->exec('ALTER TABLE users ADD COLUMN postcodes TEXT DEFAULT ""'); } catch (\Exception $e) {}
 
         $pdo->exec('CREATE TABLE IF NOT EXISTS leads (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
