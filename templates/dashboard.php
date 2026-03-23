@@ -5,20 +5,20 @@
  */
 $pageTitle = 'Dashboard';
 $statusColors = [
-    'new'      => '#3b82f6',
-    'assigned' => '#8b5cf6',
-    'booked'   => '#f97316',
-    'quoted'   => '#eab308',
-    'won'      => '#22c55e',
-    'lost'     => '#ef4444',
+    'new' => '#3b82f6', 'New' => '#3b82f6',
+    'assigned' => '#8b5cf6', 'Assigned' => '#8b5cf6',
+    'booked' => '#f97316', 'Booked' => '#f97316',
+    'quoted' => '#eab308', 'Quoted' => '#eab308',
+    'won' => '#22c55e', 'Won' => '#22c55e',
+    'lost' => '#ef4444', 'Lost' => '#ef4444',
 ];
 $statusBg = [
-    'new'      => 'bg-blue-500/10 border-blue-500/30 text-blue-400',
-    'assigned' => 'bg-purple-500/10 border-purple-500/30 text-purple-400',
-    'booked'   => 'bg-orange-500/10 border-orange-500/30 text-orange-400',
-    'quoted'   => 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400',
-    'won'      => 'bg-green-500/10 border-green-500/30 text-green-400',
-    'lost'     => 'bg-red-500/10 border-red-500/30 text-red-400',
+    'new' => 'bg-blue-500/10 border-blue-500/30 text-blue-400', 'New' => 'bg-blue-500/10 border-blue-500/30 text-blue-400',
+    'assigned' => 'bg-purple-500/10 border-purple-500/30 text-purple-400', 'Assigned' => 'bg-purple-500/10 border-purple-500/30 text-purple-400',
+    'booked' => 'bg-orange-500/10 border-orange-500/30 text-orange-400', 'Booked' => 'bg-orange-500/10 border-orange-500/30 text-orange-400',
+    'quoted' => 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400', 'Quoted' => 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400',
+    'won' => 'bg-green-500/10 border-green-500/30 text-green-400', 'Won' => 'bg-green-500/10 border-green-500/30 text-green-400',
+    'lost' => 'bg-red-500/10 border-red-500/30 text-red-400', 'Lost' => 'bg-red-500/10 border-red-500/30 text-red-400',
 ];
 ob_start();
 ?>
@@ -32,7 +32,7 @@ ob_start();
 <!-- Pipeline Cards -->
 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
     <?php foreach ($pipeline as $status => $count): ?>
-    <a href="/leads?status=<?= $status ?>" class="block border rounded-xl p-4 transition-all hover:scale-105 <?= $statusBg[$status] ?>">
+    <a href="/leads?status=<?= $status ?>" class="block border rounded-xl p-4 transition-all hover:scale-105 <?= $statusBg[$status] ?? $statusBg[strtolower($status)] ?? 'bg-gray-500/10 border-gray-500/30 text-gray-400' ?>">
         <p class="text-xs font-medium uppercase tracking-wider opacity-80"><?= ucfirst($status) ?></p>
         <p class="text-3xl font-bold mt-1"><?= $count ?></p>
     </a>
