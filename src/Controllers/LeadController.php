@@ -35,6 +35,7 @@ class LeadController
         $page = max(1, (int)($_GET['page'] ?? 1));
         $result = Lead::list($this->db, $filters, $page, $this->config['per_page']);
         $reps = User::activeReps($this->db);
+        $options = Lead::getOptions($this->db);
 
         require __DIR__ . '/../../templates/leads/index.php';
     }
@@ -50,6 +51,7 @@ class LeadController
         }
         $timeline = LeadHistory::timeline($this->db, $lead['id']);
         $reps = User::activeReps($this->db);
+        $options = Lead::getOptions($this->db);
 
         require __DIR__ . '/../../templates/leads/detail.php';
     }
@@ -59,6 +61,7 @@ class LeadController
     {
         Auth::requireAuth();
         $reps = User::activeReps($this->db);
+        $options = Lead::getOptions($this->db);
         $errors = $_SESSION['lead_errors'] ?? [];
         $old = $_SESSION['lead_old'] ?? [];
         unset($_SESSION['lead_errors'], $_SESSION['lead_old']);

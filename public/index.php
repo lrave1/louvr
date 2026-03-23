@@ -81,6 +81,7 @@ $router->post('/reps/{id}', 'App\\Controllers\\RepController', 'update');
 // Settings (admin)
 $router->get('/settings', 'App\\Controllers\\SettingsController', 'index');
 $router->post('/settings', 'App\\Controllers\\SettingsController', 'update');
+$router->post('/settings/options', 'App\\Controllers\\SettingsController', 'updateOptions');
 
 // API
 $router->post('/api/leads', 'App\\Controllers\\ApiController', 'createLead');

@@ -5,9 +5,32 @@ use App\Database;
 
 class Lead
 {
-    public const STATUSES = ['new', 'assigned', 'booked', 'quoted', 'won', 'lost'];
-    public const SOURCES  = ['web_form', 'phone', 'referral', 'other'];
-    public const PROPERTY_TYPES = ['residential', 'commercial'];
+    // Fallback defaults - overridden by settings table
+    public const DEFAULT_STATUSES = ['New', 'Assigned', 'Booked', 'Quoted', 'Won', 'Lost'];
+    public const DEFAULT_SOURCES  = ['Web Form', 'Phone', 'Referral', 'Other'];
+    public const DEFAULT_PROPERTY_TYPES = ['Residential', 'Commercial'];
+    public const DEFAULT_PRODUCTS = ['Roller Blinds', 'Venetian Blinds', 'Plantation Shutters', 'Curtains', 'Motorised Blinds', 'Awnings'];
+
+    public static function getOptions(Database $db): array
+    {
+        $load = function(string $key, array $default) use ($db): array {
+            $val = $db->fetchColumn("SELECT value FROM settings WHERE key = :k", [':k' => $key]);
+            if ($val) {
+                $decoded = json_decode($val, true);
+                if (is_array($decoded) && !empty($decoded)) {
+                    return $decoded;
+                }
+            }
+            return $default;
+        };
+
+        return [
+            'statuses'       => $load('pipeline_statuses', self::DEFAULT_STATUSES),
+            'sources'        => $load('lead_sources', self::DEFAULT_SOURCES),
+            'property_types' => $load('property_types', self::DEFAULT_PROPERTY_TYPES),
+            'products'       => $load('products', self::DEFAULT_PRODUCTS),
+        ];
+    }
 
     public static function findById(Database $db, int $id): ?array
     {

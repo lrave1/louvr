@@ -93,8 +93,9 @@ ob_start();
         <div>
             <label class="block text-sm font-medium text-gray-400 mb-1.5">Property Type</label>
             <select name="property_type" class="w-full px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="residential" <?= ($oldData['property_type'] ?? '') === 'residential' ? 'selected' : '' ?>>Residential</option>
-                <option value="commercial" <?= ($oldData['property_type'] ?? '') === 'commercial' ? 'selected' : '' ?>>Commercial</option>
+                <?php foreach ($options['property_types'] as $pt): ?>
+                <option value="<?= $e($pt) ?>" <?= ($old['property_type'] ?? '') === $pt ? 'selected' : '' ?>><?= $e($pt) ?></option>
+                <?php endforeach; ?>
             </select>
         </div>
 
@@ -102,7 +103,7 @@ ob_start();
         <div>
             <label class="block text-sm font-medium text-gray-400 mb-1.5">Source</label>
             <select name="source" class="w-full px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <?php foreach (Lead::SOURCES as $s): ?>
+                <?php foreach ($options['sources'] as $s): ?>
                 <option value="<?= $s ?>" <?= ($oldData['source'] ?? 'phone') === $s ? 'selected' : '' ?>><?= ucfirst(str_replace('_', ' ', $s)) ?></option>
                 <?php endforeach; ?>
             </select>

@@ -73,12 +73,62 @@ class Schema
             value TEXT NOT NULL DEFAULT ""
         )');
 
+        // Migration: remove CHECK constraints to allow configurable values
+        self::migrateRemoveCheckConstraints($pdo);
+
         // Indexes for performance
         $pdo->exec('CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status)');
         $pdo->exec('CREATE INDEX IF NOT EXISTS idx_leads_assigned ON leads(assigned_to)');
         $pdo->exec('CREATE INDEX IF NOT EXISTS idx_leads_created ON leads(created_at)');
         $pdo->exec('CREATE INDEX IF NOT EXISTS idx_lead_history_lead ON lead_history(lead_id)');
         $pdo->exec('CREATE INDEX IF NOT EXISTS idx_login_attempts_email ON login_attempts(email, attempted_at)');
+    }
+
+    private static function migrateRemoveCheckConstraints(\PDO $pdo): void
+    {
+        // Check if migration already applied
+        $result = $pdo->query("SELECT sql FROM sqlite_master WHERE type='table' AND name='leads'");
+        $sql = $result->fetchColumn();
+        if ($sql && !str_contains($sql, 'CHECK')) {
+            return; // Already migrated
+        }
+        if (!$sql) {
+            return; // Table doesn't exist yet (fresh install handled above)
+        }
+
+        // Recreate leads table without CHECK constraints
+        $pdo->exec('BEGIN TRANSACTION');
+        try {
+            $pdo->exec('ALTER TABLE leads RENAME TO leads_old');
+            $pdo->exec('CREATE TABLE leads (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                customer_name TEXT NOT NULL,
+                customer_email TEXT DEFAULT "",
+                customer_phone TEXT DEFAULT "",
+                address TEXT DEFAULT "",
+                suburb TEXT DEFAULT "",
+                state TEXT DEFAULT "",
+                postcode TEXT DEFAULT "",
+                property_type TEXT DEFAULT "Residential",
+                products_interested TEXT DEFAULT "",
+                source TEXT DEFAULT "Phone",
+                notes TEXT DEFAULT "",
+                status TEXT DEFAULT "New",
+                assigned_to INTEGER REFERENCES users(id) ON DELETE SET NULL,
+                appointment_date TEXT,
+                appointment_time TEXT,
+                appointment_duration INTEGER DEFAULT 60,
+                quoted_amount REAL,
+                created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )');
+            $pdo->exec('INSERT INTO leads SELECT * FROM leads_old');
+            $pdo->exec('DROP TABLE leads_old');
+            $pdo->exec('COMMIT');
+        } catch (\Exception $e) {
+            $pdo->exec('ROLLBACK');
+        }
     }
 
     public static function seed(Database $db): void
@@ -204,5 +254,11 @@ class Schema
         $db->execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('company_phone', '')");
         $db->execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('company_email', 'info@ublinds.com.au')");
         $db->execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('default_appointment_duration', '60')");
+
+        // Configurable options (JSON arrays)
+        $db->execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('lead_sources', '[\"Web Form\",\"Phone\",\"Referral\",\"Walk-in\",\"Social Media\",\"Other\"]')");
+        $db->execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('property_types', '[\"Residential\",\"Commercial\",\"Strata\",\"New Build\"]')");
+        $db->execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('products', '[\"Roller Blinds\",\"Venetian Blinds\",\"Vertical Blinds\",\"Plantation Shutters\",\"Curtains\",\"Motorised Blinds\",\"Awnings\",\"Shutters\",\"Other\"]')");
+        $db->execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('pipeline_statuses', '[\"New\",\"Assigned\",\"Booked\",\"Quoted\",\"Won\",\"Lost\"]')");
     }
 }

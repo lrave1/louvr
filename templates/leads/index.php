@@ -34,7 +34,7 @@ ob_start();
             class="col-span-2 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
         <select name="status" class="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="">All Statuses</option>
-            <?php foreach (Lead::STATUSES as $s): ?>
+            <?php foreach ($options['statuses'] as $s): ?>
             <option value="<?= $s ?>" <?= $filters['status'] === $s ? 'selected' : '' ?>><?= ucfirst($s) ?></option>
             <?php endforeach; ?>
         </select>
@@ -46,7 +46,7 @@ ob_start();
         </select>
         <select name="source" class="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="">All Sources</option>
-            <?php foreach (Lead::SOURCES as $s): ?>
+            <?php foreach ($options['sources'] as $s): ?>
             <option value="<?= $s ?>" <?= $filters['source'] === $s ? 'selected' : '' ?>><?= ucfirst(str_replace('_', ' ', $s)) ?></option>
             <?php endforeach; ?>
         </select>
