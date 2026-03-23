@@ -74,7 +74,7 @@ ob_start();
                 <th class="px-5 py-3 hidden md:table-cell">Leads</th>
                 <th class="px-5 py-3 hidden md:table-cell">Conv. Rate</th>
                 <th class="px-5 py-3">Status</th>
-                <th class="px-5 py-3 hidden lg:table-cell">API Key</th>
+
                 <th class="px-5 py-3">Actions</th>
             </tr>
         </thead>
@@ -96,9 +96,7 @@ ob_start();
                 <td class="px-5 py-3">
                     <span class="text-xs <?= $user['is_active'] ? 'text-green-400' : 'text-red-400' ?>"><?= $user['is_active'] ? 'Active' : 'Inactive' ?></span>
                 </td>
-                <td class="px-5 py-3 hidden lg:table-cell">
-                    <code class="text-xs text-gray-600 font-mono"><?= $user['api_key'] ? substr($e($user['api_key']), 0, 12) . '...' : '-' ?></code>
-                </td>
+                
                 <td class="px-5 py-3">
                     <div class="flex items-center gap-2">
                         <!-- Toggle Active -->
@@ -110,15 +108,7 @@ ob_start();
                                 <?= $user['is_active'] ? 'Deactivate' : 'Activate' ?>
                             </button>
                         </form>
-                        <!-- Regenerate API Key -->
-                        <form method="POST" action="/reps/<?= $user['id'] ?>" class="inline">
-                            <?= CsrfMiddleware::field() ?>
-                            <input type="hidden" name="action" value="regenerate_api_key">
-                            <button type="submit" class="text-xs px-2 py-1 rounded bg-gray-700 text-gray-300 hover:bg-gray-600 transition-colors"
-                                onclick="event.preventDefault(); showConfirm('Regenerate API Key', 'This will invalidate the current API key for <?= $e($user['name']) ?>.', () => this.closest('form').submit())">
-                                API Key
-                            </button>
-                        </form>
+
                         <!-- Edit (inline toggle) -->
                         <button onclick="document.getElementById('edit-<?= $user['id'] ?>').classList.toggle('hidden')"
                             class="text-xs px-2 py-1 rounded bg-gray-700 text-gray-300 hover:bg-gray-600 transition-colors">Edit</button>

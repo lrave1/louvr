@@ -4,11 +4,10 @@ namespace App\Controllers;
 use App\Database;
 use App\Models\Lead;
 use App\Models\LeadHistory;
-use App\Models\User;
 
 /**
  * API controller for external integrations.
- * Authenticated via X-API-Key header.
+ * Web form submissions create leads directly - no auth required.
  */
 class ApiController
 {
@@ -23,22 +22,28 @@ class ApiController
     public function createLead(): void
     {
         header('Content-Type: application/json');
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: POST, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type');
 
-        $user = $this->authenticate();
-        if (!$user) {
-            http_response_code(401);
-            echo json_encode(['error' => 'Invalid or missing API key.']);
+        // Handle CORS preflight
+        if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+            http_response_code(204);
             exit;
         }
 
         $input = json_decode(file_get_contents('php://input'), true);
         if (!$input) {
+            // Try form-encoded
+            $input = $_POST;
+        }
+
+        if (empty($input)) {
             http_response_code(400);
-            echo json_encode(['error' => 'Invalid JSON body.']);
+            echo json_encode(['error' => 'No data provided.']);
             exit;
         }
 
-        // Validate required fields
         $name = trim($input['customer_name'] ?? '');
         if ($name === '') {
             http_response_code(422);
@@ -47,40 +52,24 @@ class ApiController
         }
 
         $data = [
-            'customer_name'      => $name,
-            'customer_email'     => trim($input['customer_email'] ?? ''),
-            'customer_phone'     => trim($input['customer_phone'] ?? ''),
-            'address'            => trim($input['address'] ?? ''),
-            'suburb'             => trim($input['suburb'] ?? ''),
-            'state'              => trim($input['state'] ?? ''),
-            'postcode'           => trim($input['postcode'] ?? ''),
-            'property_type'      => $input['property_type'] ?? 'residential',
+            'customer_name'       => $name,
+            'customer_email'      => trim($input['customer_email'] ?? ''),
+            'customer_phone'      => trim($input['customer_phone'] ?? ''),
+            'address'             => trim($input['address'] ?? ''),
+            'suburb'              => trim($input['suburb'] ?? ''),
+            'state'               => trim($input['state'] ?? ''),
+            'postcode'            => trim($input['postcode'] ?? ''),
+            'property_type'       => trim($input['property_type'] ?? 'Residential'),
             'products_interested' => trim($input['products_interested'] ?? ''),
-            'source'             => 'web_form',
-            'notes'              => trim($input['notes'] ?? ''),
-            'created_by'         => $user['id'],
+            'source'              => 'Web Form',
+            'notes'               => trim($input['notes'] ?? ''),
         ];
 
-        // Validate enums
-        if (!in_array($data['property_type'], Lead::PROPERTY_TYPES)) {
-            $data['property_type'] = 'residential';
-        }
-
         $leadId = Lead::create($this->db, $data);
-        LeadHistory::record($this->db, $leadId, 'created', null, null, 'Created via API');
+        LeadHistory::record($this->db, $leadId, 'created', null, null, 'Created via web form');
 
         http_response_code(201);
         echo json_encode(['success' => true, 'lead_id' => $leadId]);
         exit;
-    }
-
-    /** Authenticate via X-API-Key header */
-    private function authenticate(): ?array
-    {
-        $key = $_SERVER['HTTP_X_API_KEY'] ?? '';
-        if ($key === '') {
-            return null;
-        }
-        return User::findByApiKey($this->db, $key);
     }
 }
