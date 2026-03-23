@@ -99,6 +99,13 @@ class DispatchController
             $params[':rep_id'] = (int)$repId;
         }
 
+        // Filter by status
+        $statusFilter = $_GET['status'] ?? '';
+        if ($statusFilter !== '') {
+            $where[] = 'l.status = :status_filter';
+            $params[':status_filter'] = $statusFilter;
+        }
+
         $whereClause = 'WHERE ' . implode(' AND ', $where);
 
         $events = $this->db->fetchAll(

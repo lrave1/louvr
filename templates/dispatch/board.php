@@ -16,7 +16,7 @@ $defaultColor = 'bg-blue-600 border-blue-500';
 
 <style>
     .dispatch-grid { display: grid; overflow-x: auto; }
-    .time-slot { min-width: 80px; min-height: 52px; position: relative; }
+    .time-slot { min-width: 50px; min-height: 44px; position: relative; }
     .time-slot.drop-hover { background: rgba(59, 130, 246, 0.15) !important; }
     .event-block { cursor: grab; transition: opacity 0.15s, transform 0.15s; }
     .event-block.dragging { opacity: 0.5; transform: scale(0.95); }
@@ -69,6 +69,12 @@ $defaultColor = 'bg-blue-600 border-blue-500';
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </button>
                 <button onclick="goToToday()" class="px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-white bg-gray-800 border border-gray-700 rounded-lg transition-colors">Today</button>
+                <select id="statusFilter" onchange="loadEvents()" class="px-3 py-1.5 text-xs bg-gray-800 border border-gray-700 rounded-lg text-gray-200 focus:outline-none focus:border-blue-500">
+                    <option value="">All Statuses</option>
+                    <?php foreach ($options['statuses'] as $s): ?>
+                    <option value="<?= htmlspecialchars($s) ?>"><?= htmlspecialchars($s) ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
         </div>
 
@@ -238,7 +244,9 @@ async function loadEvents() {
     loading.classList.add('flex');
 
     try {
-        const resp = await fetch(`/api/dispatch/events?date=${currentDate}&view=${currentView}`);
+        const statusFilter = document.getElementById('statusFilter')?.value || '';
+        const filterParam = statusFilter ? `&status=${encodeURIComponent(statusFilter)}` : '';
+        const resp = await fetch(`/api/dispatch/events?date=${currentDate}&view=${currentView}${filterParam}`);
         const data = await resp.json();
         eventsData = data.events || [];
     } catch (e) {
